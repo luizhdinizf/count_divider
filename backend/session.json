@@ -1,0 +1,44 @@
+{
+    "clients": [
+        "Luiz",
+        "teste"
+    ],
+    "bill": [
+        {
+            "item": "j",
+            "price": 100,
+            "quantity": 2
+        },
+        {
+            "item": "Cerveja",
+            "price": 8,
+            "quantity": 10
+        }
+    ],
+    "rules": [
+        {
+            "key": 2,
+            "name": "Luiz",
+            "item": "Cerveja",
+            "mode": "consumed",
+            "quantity": 0
+        },
+        {
+            "key": 3,
+            "name": "Luiz",
+            "item": "Cerveja",
+            "mode": "consumed",
+            "quantity": 0
+        },
+        {
+            "key": 3,
+            "name": "Luiz",
+            "item": "j",
+            "mode": "consumed",
+            "quantity": 0
+        }
+    ],
+    "gorjeta": {
+        "tip": 1.1
+    }
+}
