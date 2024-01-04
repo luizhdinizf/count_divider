@@ -1,4 +1,10 @@
 
+from json import JSONEncoder
+
+class MyEncoder(JSONEncoder):
+        def default(self, o):
+            return o.__dict__
+
 modes = ["consumed", "arrived_after", "leaved_on", "consumed_solo"]
 class bill_class():
     def __init__(self, original_bill, informed_total, clients, itens_db, rules_db) -> None:
@@ -510,5 +516,22 @@ def calculate_bill(bill, total_informado, clients, rules, gorjeta=1.1):
     bill_obj = bill_class(bill, total_informado, clients, itens, rules_db)
     bill_obj.calculate_division()
     return bill_obj.generate_bill_structure()
-# %%
-# %%
+
+def lambda_handler(event, context):
+    bill = event['bill']
+    try:
+        total_informado = event['total_informado']
+    except:
+        total_informado = 0
+    clients = event['clients']
+    rules = event['rules']
+    gorjeta = float(event['gorjeta']['tip'])
+    itens = itens_db(bill,gorjeta)
+    rules_db = rules_list_class(rules)
+    rules_db.evaluate_rules(itens)
+    bill_obj = bill_class(bill, total_informado, clients, itens, rules_db)
+    bill_obj.calculate_division()
+    structure = bill_obj.generate_bill_structure()
+    encoded = MyEncoder().encode(structure)
+    return   # Echo back the first key value
+    #raise Exception('Something went wrong')
