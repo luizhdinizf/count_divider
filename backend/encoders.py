@@ -1,4 +1,5 @@
 from json import JSONEncoder
+import json
 from flask.json.provider import JSONProvider
 
 class MyEncoder(JSONEncoder):

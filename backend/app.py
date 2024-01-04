@@ -2,7 +2,7 @@ from flask_cors import CORS
 from flask import request, jsonify
 import flask
 import json
-from bill import calculate_bill
+from bill import calculate_bill, modes
 from encoders import CustomJSONProvider
 
 

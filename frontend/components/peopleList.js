@@ -8,23 +8,14 @@ export default function PeopleList() {
   const [name, setName] = useState('');
 
   function sendClients(names) {
-    axios.post('http://192.168.2.110:5000/api/v1/clients', names)
-      .then((response) => {
-        console.log(response);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+    localStorage.setItem('clients', JSON.stringify(names));    
   }
 
   function getClients() {
-    axios.get('http://192.168.2.110:5000/api/v1/clients')
-      .then((response) => {
-        setNames(response.data);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+    const clients = JSON.parse(localStorage.getItem('clients'));
+    if (clients) {
+      setNames(clients);
+    }
   }
   
   useEffect(() => {

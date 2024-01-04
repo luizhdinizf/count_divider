@@ -26,7 +26,21 @@ export default function RuleTable() {
     const [maxQuantity, setMaxQuantity] = useState(10)
 
     function getResult() {
-        axios.get('http://192.168.2.110:5000/api/v1/resume')
+        getClients();
+        getItems();
+        const parsed_rules = getRules();
+        console.log(parsed_rules)
+        const url = 'https://fpx2ytu0se.execute-api.us-east-2.amazonaws.com/Teste/resume'
+        const request_body = {
+            "rules": parsed_rules,
+            "clients": names,
+            "bill": items,
+            "gorjeta": { "tip": 1.1 }
+        }
+        axios.post(url,
+            request_body
+            
+        )
             .then((response) => {
                 console.log(response.data.divided_bill);
                 setResult(response.data);
@@ -45,71 +59,36 @@ export default function RuleTable() {
     const messageLines = message ? message.split('\n') : [];
 
     function sendRules(rules) {
-        axios.post('http://192.168.2.110:5000/api/v1/rules', rules)
-            .then((response) => {
-                console.log("OK RULES");
-                getResult();
-            }, (error) => {
-                console.log(error);
-            });
+        localStorage.setItem('rules', JSON.stringify(rules));        
     }
     function getRules() {
-        axios.get('http://192.168.2.110:5000/api/v1/rules')
-            .then((response) => {
-                setRules(response.data);
-                getResult();
-            }
-            )
-            .catch((error) => {
-                console.log(error);
-            }
-            );
+        const rules = localStorage.getItem('rules');
+        const parsed_rules = rules ? JSON.parse(rules) : {}
+        setRules(parsed_rules);
+        return parsed_rules
+
     }
 
 
     function getClients() {
-        axios.get('http://192.168.2.110:5000/api/v1/clients')
-
-            .then((response) => {
-                setNames(response.data);
-                setSelectedPerson(response.data[0]);
-
-            }
-            )
-            .catch((error) => {
-                console.log(error);
-            }
-            );
+        const names = localStorage.getItem('clients');
+        setNames(names ? JSON.parse(names) : []);
+        setSelectedPerson(names ? JSON.parse(names)[0] : {});       
     }
 
 
     function getItems() {
-        axios.get('http://192.168.2.110:5000/api/v1/items')
-            .then((response) => {
-                setItems(response.data);
-                setSelecteditem(response.data[0].item);
-                setMaxQuantity(response.data[0].quantity)
-                setSelectedQuantity(0)
-            })
-            .catch((error) => {
-                console.log(error);
-            }
-            );
+        const items = localStorage.getItem('items');
+        setItems(items ? JSON.parse(items) : []);
+        setSelecteditem(items ? JSON.parse(items)[0].item : {});
+        setMaxQuantity(items ? Math.floor(JSON.parse(items)[0].quantity) : {});
+        setSelectedQuantity(0)
     }
 
 
     function getModes() {
-        axios.get('http://192.168.2.110:5000/api/v1/modes')
-
-            .then((response) => {
-                setModes(response.data);
-                setSelectedMode(response.data[0]);
-            }
-            )
-            .catch((error) => {
-                console.log(error);
-            }
-            );
+        setModes(["consumed", "arrived_after", "leaved_on", "consumed_solo"]);
+        setSelectedMode("consumed");        
     }
 
     useEffect(() => {
@@ -118,25 +97,27 @@ export default function RuleTable() {
         getItems();
         getModes();
         getResult();
-
     }, []);
 
-    
+
 
     function addRule() {
-        const rule_key = rules.length
-        const new_rule = { key: rule_key, name: selectedPerson, item: selecteditem, mode: selectedMode, quantity: selectedQuantity }
-        console.log(new_rule)
+        const rule_key = rules.length;
+        const new_rule = { key: rule_key, name: selectedPerson, item: selecteditem, mode: selectedMode, quantity: selectedQuantity };
+        console.log(new_rule);
         // const new_rule = { name: selectedPerson, item: selecteditem, mode: selectedMode, quantity: selectedQuantity }
-        sendRules([...rules, new_rule])
-        setRules([...rules, new_rule])
-        
+        setRules([...rules, new_rule]);
+        sendRules([...rules, new_rule]);
+        getResult();
+
+
     }
 
     function removeRule(key) {
-        const new_rules = rules.filter((rule) => rule.key !== key)
-        sendRules(new_rules)
-        setRules(new_rules)        
+        const new_rules = rules.filter((rule) => rule.key !== key);
+        setRules(new_rules);
+        sendRules(new_rules);
+        getResult();
     }
     function setCurrentItemAndQuantity(currentitem) {
         setSelecteditem(currentitem)
@@ -147,7 +128,7 @@ export default function RuleTable() {
 
     return (
         <div>
-            
+
             <Table striped hover>
                 <thead>
                     <tr>
@@ -176,7 +157,7 @@ export default function RuleTable() {
                             <td>{rule.item}</td>
                             <td>{rule.mode}</td>
                             <td>{rule.mode === "consumed" ? '-' : rule.quantity}</td>
-                            <td><Button variant="danger"  onClick={() => removeRule(rule.key)}>Remove</Button></td>
+                            <td><Button variant="danger" onClick={() => removeRule(rule.key)}>Remove</Button></td>
                         </tr>
 
                     ))}
@@ -185,7 +166,7 @@ export default function RuleTable() {
             </Table>
             <hr></hr>
             <div>
-           
+
                 {dividedBill && Object.entries(dividedBill).map(([key, value]) => (
                     <div key={key}>
                         <span>{key} vai pagar </span>
@@ -194,19 +175,19 @@ export default function RuleTable() {
                 ))}
                 <div>
                     <span>Soma da conta: </span>
-                    <span>R$ {somaDaConta ? somaDaConta.toFixed(2): "-" }</span>
+                    <span>R$ {somaDaConta ? somaDaConta.toFixed(2) : "-"}</span>
                 </div>
                 <div>
                     <span>Soma do que todos vão pagar: </span>
-                    <span>R$ {somaDivisao ? somaDivisao.toFixed(2): "-" }</span>
+                    <span>R$ {somaDivisao ? somaDivisao.toFixed(2) : "-"}</span>
                 </div>
                 <div>
                     <span>Resultado: </span>
                     <Alert style={{ color: isSomaDivisaoEqualSomaDaConta ? 'green' : 'red' }} variant={isSomaDivisaoEqualSomaDaConta ? 'success' : 'danger'}>{isSomaDivisaoEqualSomaDaConta ? 'OK' : 'ERRO'}</Alert>
                 </div>
-            {messageLines.map((line, index) => (
-                line && <Alert key={index} variant={isSomaDivisaoEqualSomaDaConta ? 'success' : 'danger'}>{line}</Alert>
-            ))}
+                {messageLines.map((line, index) => (
+                    line && <Alert key={index} variant={isSomaDivisaoEqualSomaDaConta ? 'success' : 'danger'}>{line}</Alert>
+                ))}
             </div>
         </div>
     )
@@ -217,7 +198,7 @@ export default function RuleTable() {
 
 function ListPicker({ items, onClick }) {
     const [selectedItem, setSelectedItem] = useState(); // Set the first item as the default
-    
+
     function handleChange(e) {
         console.log(e)
         const newValue = e;
@@ -227,12 +208,12 @@ function ListPicker({ items, onClick }) {
 
     return (
         <DropdownList
-        data={items}
-        value={selectedItem}
-        onChange={handleChange}
+            data={items}
+            value={selectedItem}
+            onChange={handleChange}
         />
     );
-    
+
 
     // return (
     //     <select value={selectedItem} onChange={handleChange}>

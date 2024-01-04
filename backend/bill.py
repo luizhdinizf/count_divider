@@ -517,15 +517,16 @@ def calculate_bill(bill, total_informado, clients, rules, gorjeta=1.1):
     bill_obj.calculate_division()
     return bill_obj.generate_bill_structure()
 
-def lambda_handler(event, context):
-    bill = event['bill']
+def lambda_handler(received, context):
+    received = json.loads(event['body'])
+    bill = received['bill']
     try:
-        total_informado = event['total_informado']
+        total_informado = received['total_informado']
     except:
         total_informado = 0
-    clients = event['clients']
-    rules = event['rules']
-    gorjeta = float(event['gorjeta']['tip'])
+    clients = received['clients']
+    rules = received['rules']
+    gorjeta = float(received['gorjeta']['tip'])
     itens = itens_db(bill,gorjeta)
     rules_db = rules_list_class(rules)
     rules_db.evaluate_rules(itens)
@@ -533,5 +534,5 @@ def lambda_handler(event, context):
     bill_obj.calculate_division()
     structure = bill_obj.generate_bill_structure()
     encoded = MyEncoder().encode(structure)
-    return   # Echo back the first key value
+    return encoded
     #raise Exception('Something went wrong')

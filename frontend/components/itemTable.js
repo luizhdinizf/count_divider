@@ -8,23 +8,15 @@ export default function ItemTable(props) {
     const [items, setItems] = useState([]);
     const [result, setResult] = useState();
     function senditems(items) {
-        axios.post('http://192.168.2.110:5000/api/v1/items', items)
-            .then((response) => {
-                console.log(response);
-            }, (error) => {
-                console.log(error);
-            });
+        localStorage.setItem('items', JSON.stringify(items));
     }
 
 
     function getItems() {
-        axios.get('http://192.168.2.110:5000/api/v1/items')
-            .then((response) => {
-                setItems(response.data);
-            })
-            .catch((error) => {
-                console.log(error);
-            });
+        const items = JSON.parse(localStorage.getItem('items'));
+        if (items) {
+            setItems(items);
+        }
     }
     useEffect(() => {
         getItems();
@@ -43,12 +35,7 @@ export default function ItemTable(props) {
         senditems(new_items);
     }
     function setTip(gorjeta) {
-        axios.post('http://192.168.2.110:5000/api/v1/tip', { tip: 1+gorjeta/100 })
-            .then((response) => {
-                console.log("OK TIP");
-            }, (error) => {
-                console.log(error);
-            });
+        localStorage.setItem('tip', JSON.stringify(1+gorjeta/100));
     }
 
 
