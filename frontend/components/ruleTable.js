@@ -63,7 +63,7 @@ export default function RuleTable() {
     }
     function getRules() {
         const rules = localStorage.getItem('rules');
-        const parsed_rules = rules ? JSON.parse(rules) : {}
+        const parsed_rules = rules ? JSON.parse(rules) : []
         setRules(parsed_rules);
         return parsed_rules
 
