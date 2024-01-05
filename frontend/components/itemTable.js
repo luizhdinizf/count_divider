@@ -3,10 +3,15 @@ import axios from 'axios';
 import NumberPicker from "react-widgets/NumberPicker";
 import Button from 'react-bootstrap/Button';
 import Table from 'react-bootstrap/Table';
+import Modal from 'react-bootstrap/Modal';
 
 export default function ItemTable(props) {
     const [items, setItems] = useState([]);
     const [result, setResult] = useState();
+    const [tip, setTip] = useState(10);
+    const [showModal, setShowModal] = useState(false);
+    const [show, setShow] = useState(false);
+
     function senditems(items) {
         localStorage.setItem('items', JSON.stringify(items));
     }
@@ -20,6 +25,7 @@ export default function ItemTable(props) {
     }
     useEffect(() => {
         getItems();
+        getTip();
     }, []);
 
 
@@ -34,8 +40,19 @@ export default function ItemTable(props) {
         setItems(new_items);
         senditems(new_items);
     }
-    function setTip(gorjeta) {
-        localStorage.setItem('tip', JSON.stringify(1+gorjeta/100));
+
+  
+
+    function sendTip(gorjeta) {
+        setTip(gorjeta);
+        localStorage.setItem('tip', JSON.stringify(gorjeta));
+    }
+
+    function getTip() {
+        const tip = JSON.parse(localStorage.getItem('tip'));
+        if (tip) {
+            return tip;
+        }
     }
 
 
@@ -57,15 +74,16 @@ export default function ItemTable(props) {
                             <td>{item.item}</td>
                             <td>{item.quantity}</td>
                             <td>{Number(item.price).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</td>
-                            
-                            <td>{props.editable && <Button variant='danger' onClick={() => removeItem(item.item, item.price, item.quantity)}>Remove</Button>}</td>
+
+                            <td>{EditModal(show,setShow,item.item,item.price,item.quantity,items,setItems)}
+                                {props.editable && <Button variant='danger' onClick={() => removeItem(item.item, item.price, item.quantity)}>Remove</Button>}</td>
                         </tr>
                     ))}
                 </tbody>
             </Table>
             {props.editable && <div>
                 Gorjeta:
-                <NumberPicker defaultValue={10} onChange={(gorjeta) => setTip(gorjeta)} />
+                <NumberPicker defaultValue={tip} onChange={(gorjeta) => sendTip(gorjeta)} />
             </div>}
         </div>
     );
@@ -90,5 +108,66 @@ export function InputItem({ onClick }) {
             <td><NumberPicker onChange={(price) => setPrice(price)} /></td>
             <td><Button onClick={handleClick}>Add</Button></td>
         </tr>
+    );
+}
+
+function EditModal(show, setShow, itemName, price, quantity,items,setItems) {
+    function setQuantity(quantity) {
+        console.log(itemName)
+        let new_items = items.map((item) => {
+            if (item.item === itemName) {
+                item.quantity = quantity;
+                console.log(item)
+            }
+            return item;
+        });
+        localStorage.setItem('items', JSON.stringify(items));
+        setItems(new_items);
+    }
+    
+    function setPrice(price) {
+        console.log(itemName)
+        let new_items = items.map((item) => {
+            if (item.item === itemName) {
+                item.price = price;
+                console.log(item)
+            }
+            return item;
+        });
+        localStorage.setItem('items', JSON.stringify(items));
+        setItems(new_items);
+    }
+    
+    const handleClose = () => setShow(false);
+    const handleShow = () => setShow(true);
+    function handleChangeitem(e) {
+        setitem(e.target.value);
+    }
+
+    return (
+        <>
+            <Button variant="primary" onClick={handleShow}>
+                Edit
+            </Button>
+
+            <Modal show={show} onHide={handleClose}>
+                <Modal.Header>
+                    <Modal.Title>Modal heading</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                <td><input type="text" value={itemName} onChange={handleChangeitem} className="form-control" /></td>
+                <td><NumberPicker defaultValue={quantity} onChange={(quantity) => setQuantity(quantity)} /></td>
+                <td><NumberPicker defaultValue={price} onChange={(price) => setPrice(price)} /></td>
+
+
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={handleClose}>
+                        Close
+                    </Button>
+                   
+                </Modal.Footer>
+            </Modal>
+        </>
     );
 }
