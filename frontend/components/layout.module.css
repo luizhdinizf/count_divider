@@ -15,6 +15,26 @@
     justify-content: flex-start;
     gap: 5px;
   }
+  .peopleCardList {
+    display: grid;
+    grid-template-columns: 33% 33% 33%;
+    gap: 5px;
+  }	
+  .itemlist {
+    display: flex;
+    flex-direction: row;
+    flex-wrap:wrap;
+    justify-content: flex-start;
+    gap: 45px;
+  }	
+  .itemCheckbox {
+    /* font-size: 2.2rem; */
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    gap: 2px;
+  }
   
 
 
