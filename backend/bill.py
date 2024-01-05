@@ -1,6 +1,6 @@
 
 from json import JSONEncoder
-
+import json
 class MyEncoder(JSONEncoder):
         def default(self, o):
             return o.__dict__
@@ -48,21 +48,21 @@ class bill_class():
         """
         Returns the total amount of the divided bill.
         """
-        return sum(self.divided_bill.values())
+        return round(sum(self.divided_bill.values()),2)
 
     @property
     def real_total(self):
         """
         Property that returns the real total amount of the bill.
         """
-        return sum([self.itens_db[item].get_real_total() for item in self.itens_db])
+        return round(sum([self.itens_db[item].get_real_total() for item in self.itens_db]),2)
 
     def check_divided_total_match(self):
         """
         Checks if the divided total matches the real total.
         Returns True if they match, False otherwise.
         """
-        if self.get_divided_total() == self.real_total:
+        if self.get_divided_total() - self.real_total < 0.01 and self.get_divided_total() - self.real_total > -0.01:
             return True
         else:
             return False
@@ -72,7 +72,7 @@ class bill_class():
         Checks if the informed total matches the real total.
         Returns True if they match, False otherwise.
         """
-        if self.real_total == self.informed_total:
+        if self.real_total - self.informed_total < 0.01 and self.real_total - self.informed_total > -0.01:
             return True
         else:
             return False
@@ -167,8 +167,8 @@ class bill_class():
             "clients": self.clients,
             "informed_total_match": self.check_informed_total_match(),
             "divided_total_match": self.check_divided_total_match(),
-            "real_to_informed": self.real_total-self.informed_total,
-            "real_to_divided": self.real_total-self.get_divided_total(),
+            "real_to_informed": round(self.real_total-self.informed_total,2),
+            "real_to_divided": round(self.real_total-self.get_divided_total(),2),
             "itens_differece": self.generate_itens_differece(),
             "message": self.generate_message()
         }
@@ -517,7 +517,7 @@ def calculate_bill(bill, total_informado, clients, rules, gorjeta=1.1):
     bill_obj.calculate_division()
     return bill_obj.generate_bill_structure()
 
-def lambda_handler(received, context):
+def lambda_handler(event, context):
     received = json.loads(event['body'])
     bill = received['bill']
     try:
@@ -535,4 +535,4 @@ def lambda_handler(received, context):
     structure = bill_obj.generate_bill_structure()
     encoded = MyEncoder().encode(structure)
     return encoded
-    #raise Exception('Something went wrong')
+    

@@ -171,6 +171,8 @@ function ResultShower(rules, dividedBill, setDividedBill) {
     const parsed_items = items ? JSON.parse(items) : [];
     const rules = localStorage.getItem('rules');
     const parsed_rules = rules ? JSON.parse(rules) : []
+    const tip = localStorage.getItem('tip');
+    const parsed_tip = tip ? JSON.parse(tip) : 1.1
 
 
     const url = 'https://fpx2ytu0se.execute-api.us-east-2.amazonaws.com/Teste/resume'
@@ -178,7 +180,7 @@ function ResultShower(rules, dividedBill, setDividedBill) {
       "rules": parsed_rules,
       "clients": parsed_names,
       "bill": parsed_items,
-      "gorjeta": { "tip": 1.1 }
+      "gorjeta": { "tip": parsed_tip }
     }
     axios.post(url,
       request_body
