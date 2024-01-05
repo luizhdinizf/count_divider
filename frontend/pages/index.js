@@ -39,12 +39,12 @@ export default function HomePage() {
       
       <div>
       <div className={styles.buttoncontainer}>
-        <Button onClick={() => handleTabClick(1)}>Pessoas Na Mesa</Button>
-        <Button onClick={() => handleTabClick(2)}>Itens da Conta</Button>
-        <Button onClick={() => handleTabClick(3)}>Divisão da Conta</Button>
+        <Button onClick={() => handleTabClick(1)}>Itens da Conta</Button>
+        <Button onClick={() => handleTabClick(2)}>Pessoas Na Mesa</Button>
+        {/* <Button onClick={() => handleTabClick(3)}>Divisão da Conta</Button> */}
       </div>
-      {activeTab === 1 && <div className={styles.container}><PeopleList/></div>}
-      {activeTab === 2 && <div className={styles.container}><ItemTable editable={true}/></div>}
+      {activeTab === 1 && <div className={styles.container}><ItemTable editable={true}/></div>}
+      {activeTab === 2 && <div className={styles.container}><PeopleList/></div>}
       {activeTab === 3 && <div className={styles.container}><FinalTable/></div>}
      
     </div>

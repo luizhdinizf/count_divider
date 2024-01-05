@@ -22,13 +22,13 @@
   }	
   .itemlist {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     flex-wrap:wrap;
     justify-content: flex-start;
-    gap: 45px;
+    gap: 10px;
   }	
   .itemCheckbox {
-    /* font-size: 2.2rem; */
+    font-size: 1.2rem;
     display: flex;
     flex-direction: row;
     flex-wrap: nowrap;

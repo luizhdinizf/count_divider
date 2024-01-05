@@ -215,6 +215,79 @@ function ListPicker({ items, onClick }) {
     );
 
 
+function ResultShower(){
+    const [dividedBill, setDividedBill] = useState();
+    const [somaDaConta, setSomaDaConta] = useState();
+    const [somaDivisao, setSomaDivisao] = useState();
+    const [message, setMessage] = useState();
+    const [result, setResult] = useState();
+    const isSomaDivisaoEqualSomaDaConta = somaDivisao === somaDaConta;
+    const messageLines = message ? message.split('\n') : [];
+
+    function getResult() {
+        const names = localStorage.getItem('clients');
+        const parsed_names = names ? JSON.parse(names) : []
+        const items = localStorage.getItem('items');
+        const parsed_items = items ? JSON.parse(items) : [];
+        const rules = localStorage.getItem('rules');
+        const parsed_rules = rules ? JSON.parse(rules) : []
+        
+        
+        console.log(parsed_rules)
+        const url = 'https://fpx2ytu0se.execute-api.us-east-2.amazonaws.com/Teste/resume'
+        const request_body = {
+            "rules": parsed_rules,
+            "clients": parsed_names,
+            "bill": parsed_items,
+            "gorjeta": { "tip": 1.1 }
+        }
+        axios.post(url,
+            request_body
+            
+        )
+            .then((response) => {
+                console.log(response.data.divided_bill);
+                setResult(response.data);
+                setDividedBill(response.data.divided_bill);
+                setSomaDaConta(response.data.real_total);
+                setSomaDivisao(response.data.divided_total);
+                setMessage(response.data.message);
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+    }
+    useEffect(() => {
+        getResult();
+    }, []);
+    return(
+        <div>
+
+                {dividedBill && Object.entries(dividedBill).map(([key, value]) => (
+                    <div key={key}>
+                        <span>{key} vai pagar </span>
+                        <span>R$ {value.toFixed(2)}</span>
+                    </div>
+                ))}
+                <div>
+                    <span>Soma da conta: </span>
+                    <span>R$ {somaDaConta ? somaDaConta.toFixed(2) : "-"}</span>
+                </div>
+                <div>
+                    <span>Soma do que todos vão pagar: </span>
+                    <span>R$ {somaDivisao ? somaDivisao.toFixed(2) : "-"}</span>
+                </div>
+                <div>
+                    <span>Resultado: </span>
+                    <Alert style={{ color: isSomaDivisaoEqualSomaDaConta ? 'green' : 'red' }} variant={isSomaDivisaoEqualSomaDaConta ? 'success' : 'danger'}>{isSomaDivisaoEqualSomaDaConta ? 'OK' : 'ERRO'}</Alert>
+                </div>
+                {messageLines.map((line, index) => (
+                    line && <Alert key={index} variant={isSomaDivisaoEqualSomaDaConta ? 'success' : 'danger'}>{line}</Alert>
+                ))}
+            </div>
+    )
+}
+
     // return (
     //     <select value={selectedItem} onChange={handleChange}>
     //         {items.map((item) => (

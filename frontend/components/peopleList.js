@@ -3,14 +3,16 @@ import axios from 'axios';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import Card from 'react-bootstrap/Card';
+import Alert from 'react-bootstrap/Alert';
 import styles from '../components/layout.module.css';
 import Avatar from 'react-avatar';
 
 export default function PeopleList() {
+  const [dividedBill, setDividedBill] = useState();
   const [names, setNames] = useState([]);
   const [currentName, setCurrentName] = useState('');
   const [rules, setRules] = useState([])
-
+  console.log("renderizou")
   function sendRules(rules) {
     localStorage.setItem('rules', JSON.stringify(rules));
   }
@@ -57,9 +59,10 @@ export default function PeopleList() {
 
 
   return (
-    <div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+      {ResultShower(rules, dividedBill, setDividedBill)}
       {nameAdder(currentName, setCurrentName, addName)}
-      {PeopleCardList(names, removeName, rules, setRules)}
+      {PeopleCardList(names, removeName, rules, setRules, dividedBill)}
     </div>
   );
 }
@@ -73,11 +76,11 @@ function nameAdder(currentName, handleChange, addName) {
   );
 }
 
-function PeopleCardList(names, removeName, rules, setRules) {
+function PeopleCardList(names, removeName, rules, setRules, dividedBill) {
   return (
     <div className={styles.peopleCardList}>
       {names.map((name) => (
-        PeopleCard(name, removeName, rules, setRules)
+        PeopleCard(name, removeName, rules, setRules, dividedBill)
       ))}
     </div>
   );
@@ -85,7 +88,7 @@ function PeopleCardList(names, removeName, rules, setRules) {
 
 
 
-function PeopleCard(name, clicked, rules, setRules) {
+function PeopleCard(name, clicked, rules, setRules, dividedBill) {
 
 
   const items = localStorage.getItem('items');
@@ -95,14 +98,15 @@ function PeopleCard(name, clicked, rules, setRules) {
     <Card >
       <Card.Body>
         <Card.Text>
-        <Card.Title><Avatar name={name} /> {name}</Card.Title>
-      
+          <Card.Title><Avatar name={name} /> {name}</Card.Title>
+
           <Form className={styles.itemlist}>
             {itemsList.map((item) => (
               itemCheckbox(name, item, rules, setRules)
 
             ))}
           </Form>
+          Total a pagar: R${dividedBill && dividedBill[name] ? dividedBill[name].toFixed(2) : "-"}
         </Card.Text>
         <Button variant='danger' onClick={() => clicked(name)}>Remover</Button>
       </Card.Body>
@@ -113,8 +117,7 @@ function PeopleCard(name, clicked, rules, setRules) {
 
 function itemCheckbox(name, item, rules, setRules) {
   const checked = rules.filter((rule) => rule.name === name && rule.item === item.item).length > 0
-  console.log(rules);
-  function changeRule(checked, selectedPerson, selecteditem, selectedMode, selectedQuantity,setRules) {
+  function changeRule(checked, selectedPerson, selecteditem, selectedMode, selectedQuantity, setRules) {
     const rules = localStorage.getItem('rules');
     const parsed_rules = rules ? JSON.parse(rules) : []
     if (checked) {
@@ -133,21 +136,92 @@ function itemCheckbox(name, item, rules, setRules) {
       setRules(reordered_rules);
       localStorage.setItem('rules', JSON.stringify(reordered_rules));
     }
-    
-    
+
+
 
   }
 
   return (
     <div className={styles.itemCheckbox}>
 
-    <Form.Check
-      type="checkbox"      
-      checked={checked}
-      key={name + item.item}
-      onChange={(e) => { changeRule(e.target.checked, name, item.item, "consumed", item.quantity,setRules);}}
+      <Form.Check
+        type="checkbox"
+        checked={checked}
+        key={name + item.item}
+        onChange={(e) => { changeRule(e.target.checked, name, item.item, "consumed", item.quantity, setRules); }}
       />
-    {item.item}
+      {item.item}
     </div>
+  )
+}
+
+function ResultShower(rules, dividedBill, setDividedBill) {
+
+  const [somaDaConta, setSomaDaConta] = useState();
+  const [somaDivisao, setSomaDivisao] = useState();
+  const [message, setMessage] = useState();
+  const [result, setResult] = useState();
+  const isSomaDivisaoEqualSomaDaConta = somaDivisao === somaDaConta;
+  const messageLines = message ? message.split('\n') : [];
+
+  function getResult() {
+    const names = localStorage.getItem('clients');
+    const parsed_names = names ? JSON.parse(names) : []
+    const items = localStorage.getItem('items');
+    const parsed_items = items ? JSON.parse(items) : [];
+    const rules = localStorage.getItem('rules');
+    const parsed_rules = rules ? JSON.parse(rules) : []
+
+
+    const url = 'https://fpx2ytu0se.execute-api.us-east-2.amazonaws.com/Teste/resume'
+    const request_body = {
+      "rules": parsed_rules,
+      "clients": parsed_names,
+      "bill": parsed_items,
+      "gorjeta": { "tip": 1.1 }
+    }
+    axios.post(url,
+      request_body
+
+    )
+      .then((response) => {
+        setResult(response.data);
+        setDividedBill(response.data.divided_bill);
+        setSomaDaConta(response.data.real_total);
+        setSomaDivisao(response.data.divided_total);
+        setMessage(response.data.message);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }
+  useEffect(() => {
+    getResult();
+  }, []);
+
+  useEffect(() => {
+    getResult();
+  }, [rules]);
+  return (
+    
+
+   
+      <Alert variant={isSomaDivisaoEqualSomaDaConta ? 'success' : 'danger'}>
+        <div>
+          <span>Soma da conta: </span>
+          <span>R$ {somaDaConta ? somaDaConta.toFixed(2) : "-"}</span>
+        </div>
+        <div>
+          <span>Soma do que todos vão pagar: </span>
+          <span>R$ {somaDivisao ? somaDivisao.toFixed(2) : "-"}</span>
+        </div>
+        <div>          
+          <div style={{ color: isSomaDivisaoEqualSomaDaConta ? 'green' : 'red' }} variant={isSomaDivisaoEqualSomaDaConta ? 'success' : 'danger'}>{isSomaDivisaoEqualSomaDaConta ? 'OK' : 'ERRO'}</div>
+        </div>
+        {messageLines.map((line, index) => (
+          line && <div key={index} variant={isSomaDivisaoEqualSomaDaConta ? 'success' : 'danger'}>{line}</div>
+        ))}
+    
+    </Alert >
   )
 }
