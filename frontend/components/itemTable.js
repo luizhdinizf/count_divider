@@ -6,7 +6,7 @@ import Modal from 'react-bootstrap/Modal';
 
 export default function ItemTable(props) {
     const [items, setItems] = useState([]);
-    const [tip, setTip] = useState(0);
+    const [tip, setTip] = useState(10);
     const [show, setShow] = useState(false);
     const [currentItem, setCurrentItem] = useState();
 
