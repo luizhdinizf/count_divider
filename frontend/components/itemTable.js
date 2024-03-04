@@ -1,20 +1,19 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
 import NumberPicker from "react-widgets/NumberPicker";
 import Button from 'react-bootstrap/Button';
 import Table from 'react-bootstrap/Table';
 import Modal from 'react-bootstrap/Modal';
 
 export default function ItemTable(props) {
-    const this_tip = 0;
     const [items, setItems] = useState([]);
-    const [tip, setTip] = useState(this_tip ? this_tip : 0);
+    const [tip, setTip] = useState(0);
     const [show, setShow] = useState(false);
     const [currentItem, setCurrentItem] = useState();
 
 
     useEffect(() => {
         getItems();
+        getTip();
     }, []);
     function senditems(items) {
         localStorage.setItem('items', JSON.stringify(items));
@@ -40,7 +39,15 @@ export default function ItemTable(props) {
         senditems(new_items);
     }
 
+    function getTip() {
+        const tip = JSON.parse(localStorage.getItem('tip'));
+        if (tip) {
+            setTip(tip);
+        }
+    }
+
     function sendTip(gorjeta) {
+        setTip(gorjeta);
         localStorage.setItem('tip', JSON.stringify(gorjeta));
     }
 
@@ -71,7 +78,7 @@ export default function ItemTable(props) {
             </Table>
             {props.editable && <div>
                 Gorjeta:
-                <NumberPicker defaultValue={tip} onChange={(gorjeta) => sendTip(gorjeta)} />
+                <NumberPicker value={tip} onChange={(gorjeta) => sendTip(gorjeta)} />
             </div>}
         </div>
     );
