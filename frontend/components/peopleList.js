@@ -60,9 +60,9 @@ export default function PeopleList() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-      {ResultShower(rules, dividedBill, setDividedBill)}
       {nameAdder(currentName, setCurrentName, addName)}
       {PeopleCardList(names, removeName, rules, setRules, dividedBill)}
+      {ResultShower(rules, dividedBill, setDividedBill)}
     </div>
   );
 }
@@ -106,7 +106,7 @@ function PeopleCard(name, clicked, rules, setRules, dividedBill) {
 
             ))}
           </Form>
-          Total a pagar: R${dividedBill && dividedBill[name] ? dividedBill[name].toFixed(2) : "-"}
+          Total a pagar: <strong>R${dividedBill && dividedBill[name] ? dividedBill[name].toFixed(2) : "-"}</strong>
         </Card.Text>
         <Button variant='danger' onClick={() => clicked(name)}>Remover</Button>
       </Card.Body>

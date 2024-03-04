@@ -7,11 +7,14 @@ import Modal from 'react-bootstrap/Modal';
 
 export default function ItemTable(props) {
     const [items, setItems] = useState([]);
-    const [result, setResult] = useState();
-    const [tip, setTip] = useState(10);
-    const [showModal, setShowModal] = useState(false);
+    const [tip, setTip] = useState(JSON.parse(localStorage.getItem('tip')));
     const [show, setShow] = useState(false);
+    const [currentItem, setCurrentItem] = useState();
 
+
+    useEffect(() => {
+        getItems();
+    }, []);
     function senditems(items) {
         localStorage.setItem('items', JSON.stringify(items));
     }
@@ -23,42 +26,26 @@ export default function ItemTable(props) {
             setItems(items);
         }
     }
-    useEffect(() => {
-        getItems();
-        getTip();
-    }, []);
-
 
     function pushItem(item, price, quantity) {
         let new_items = [...items, { item: item, price: price, quantity: quantity }];
         setItems(new_items);
         senditems(new_items);
     }
-    function removeItem(name, price, quantity) {
+    function removeItem(name) {
         let new_items = items.filter((item) => item.item !== name);
         console.log(new_items)
         setItems(new_items);
         senditems(new_items);
     }
 
-  
-
     function sendTip(gorjeta) {
-        setTip(gorjeta);
         localStorage.setItem('tip', JSON.stringify(gorjeta));
     }
 
-    function getTip() {
-        const tip = JSON.parse(localStorage.getItem('tip'));
-        if (tip) {
-            return tip;
-        }
-    }
-
-
-
     return (
         <div>
+            {EditModal(show, setShow, currentItem, items, setItems)}
             <Table striped hover >
                 <thead>
                     <tr>
@@ -75,8 +62,8 @@ export default function ItemTable(props) {
                             <td>{item.quantity}</td>
                             <td>{Number(item.price).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</td>
 
-                            <td>{EditModal(show,setShow,item.item,item.price,item.quantity,items,setItems)}
-                                {props.editable && <Button variant='danger' onClick={() => removeItem(item.item, item.price, item.quantity)}>Remove</Button>}</td>
+                            <td>{EditButton(item,setShow,setCurrentItem)}</td>
+                                <td>{props.editable && <Button variant='danger' onClick={() => removeItem(item.item)}>Remove</Button>}</td>
                         </tr>
                     ))}
                 </tbody>
@@ -111,11 +98,23 @@ export function InputItem({ onClick }) {
     );
 }
 
-function EditModal(show, setShow, itemName, price, quantity,items,setItems) {
+function EditButton(thisItem, setShow, setCurrentItem) {
+    const handleShow = () => {
+        setShow(true);
+        setCurrentItem(thisItem);
+        console.log(thisItem)
+    }
+    return (
+        <Button variant="primary" onClick={handleShow}>
+                Edit
+        </Button>
+    )
+}
+
+function EditModal(show, setShow, currentItem, items, setItems) {
     function setQuantity(quantity) {
-        console.log(itemName)
         let new_items = items.map((item) => {
-            if (item.item === itemName) {
+            if (item.item === currentItem.item) {
                 item.quantity = quantity;
                 console.log(item)
             }
@@ -126,9 +125,8 @@ function EditModal(show, setShow, itemName, price, quantity,items,setItems) {
     }
     
     function setPrice(price) {
-        console.log(itemName)
         let new_items = items.map((item) => {
-            if (item.item === itemName) {
+            if (item.item === currentItem.item) {
                 item.price = price;
                 console.log(item)
             }
@@ -139,25 +137,24 @@ function EditModal(show, setShow, itemName, price, quantity,items,setItems) {
     }
     
     const handleClose = () => setShow(false);
-    const handleShow = () => setShow(true);
-    function handleChangeitem(e) {
-        setitem(e.target.value);
-    }
+    
+
+    const currentItemName = currentItem ? currentItem.item : '';
+    const currentItemPrice = currentItem ? currentItem.price : '';
+    const currentItemQuantity = currentItem ? currentItem.quantity : '';
 
     return (
         <>
-            <Button variant="primary" onClick={handleShow}>
-                Edit
-            </Button>
+            
 
             <Modal show={show} onHide={handleClose}>
                 <Modal.Header>
-                    <Modal.Title>Modal heading</Modal.Title>
+                    <Modal.Title>Editar</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                <td><input type="text" value={itemName} onChange={handleChangeitem} className="form-control" /></td>
-                <td><NumberPicker defaultValue={quantity} onChange={(quantity) => setQuantity(quantity)} /></td>
-                <td><NumberPicker defaultValue={price} onChange={(price) => setPrice(price)} /></td>
+                <td>Item: {currentItemName}</td>
+                <td>Quantidade: <NumberPicker defaultValue={currentItemQuantity} onChange={(currentItemQuantity) => setQuantity(currentItemQuantity)} /></td>
+                <td>Preço:<NumberPicker defaultValue={currentItemPrice} onChange={(currentItemPrice) => setPrice(currentItemPrice)} /></td>
 
 
                 </Modal.Body>
@@ -165,7 +162,6 @@ function EditModal(show, setShow, itemName, price, quantity,items,setItems) {
                     <Button variant="secondary" onClick={handleClose}>
                         Close
                     </Button>
-                   
                 </Modal.Footer>
             </Modal>
         </>
