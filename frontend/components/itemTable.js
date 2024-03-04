@@ -6,8 +6,9 @@ import Table from 'react-bootstrap/Table';
 import Modal from 'react-bootstrap/Modal';
 
 export default function ItemTable(props) {
+    const this_tip = JSON.parse(localStorage.getItem('tip'))
     const [items, setItems] = useState([]);
-    const [tip, setTip] = useState(JSON.parse(localStorage.getItem('tip')));
+    const [tip, setTip] = useState(this_tip ? this_tip : 0);
     const [show, setShow] = useState(false);
     const [currentItem, setCurrentItem] = useState();
 
