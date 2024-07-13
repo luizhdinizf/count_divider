@@ -4,14 +4,12 @@
 		CardBody,
 		CardHeader,
 		CardFooter,
-		CardTitle,
 		Modal,
 		Table,
 		Button,
 		Input,
 	} from "sveltestrap/src";
 	import { writable } from "svelte/store";
-	import { Avatar } from "flowbite-svelte";
 
 	// Initialize the store with the value from localStorage
 	const initialItens = JSON.parse(localStorage.getItem("itens")) || [];
@@ -62,7 +60,6 @@
 		adjustCustomerItens();
 		return resultado;
 	}
-	// $: fractions = calculate_fractions(currentFractionNumber, currentQuantity);
 	$: fractions = dividirEmPartes(currentQuantity, currentFractionNumber);
 
 	function clearAccount() {
@@ -143,7 +140,6 @@
 		$customers = $customers.filter((customer) => customer.id !== id);
 	}
 	function adjustCustomerItens(){
-		console.log($customers)
 		$customers = $customers.map(customer => {			
 			// add the itens that are not in the customer itens list
 			for (let i = 0; i < $itens.length; i++) {
@@ -172,12 +168,6 @@
 			}			
 			return customer
 		})
-		
-		// let itemNames = $itens.map(item => item.name)
-		
-		
-		
-	
 	}
 </script>
 
@@ -218,6 +208,7 @@
 			{#each $itens as item}
 				<tr>
 					<td
+						on:keydown={}
 						on:click={() => {
 							currentId = item.id;
 							currentItemName = item.name;
