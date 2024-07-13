@@ -3,7 +3,7 @@
 		Card,
 		CardBody,
 		CardHeader,
-		CardText,
+		CardFooter,
 		CardTitle,
 		Modal,
 		Table,
@@ -11,24 +11,22 @@
 		Input,
 	} from "sveltestrap/src";
 	import { writable } from "svelte/store";
-	import {
-		Avatar,
-		Dropdown,
-		DropdownHeader,
-		DropdownItem,
-		DropdownDivider,
-		Tooltip,
-	} from "flowbite-svelte";
+	import { Avatar } from "flowbite-svelte";
 
 	// Initialize the store with the value from localStorage
 	const initialItens = JSON.parse(localStorage.getItem("itens")) || [];
+	const initialCustomers = JSON.parse(localStorage.getItem("customers")) || [];
 
 	// Create the store
 	const itens = writable(initialItens);
+	const customers = writable(initialCustomers);
 
 	// Subscribe to the store and update localStorage every time it changes
 	itens.subscribe((value) => {
 		localStorage.setItem("itens", JSON.stringify(value));
+	});
+	customers.subscribe((value) => {
+		localStorage.setItem("customers", JSON.stringify(value));
 	});
 
 	import FaTrash from "svelte-icons/fa/FaTrash.svelte";
@@ -39,7 +37,8 @@
 	const toogleSplit = () => (openSplit = !openSplit);
 
 	let currentId = 0;
-	let currentName = "";
+	let currentItemName = "";
+	let currentCustomerName = "";	
 	let currentQuantity = 1;
 	let currentPrice = 0;
 	let currentFractionNumber = 1;
@@ -60,7 +59,7 @@
 		} else {
 			resultado.push(quociente);
 		}
-
+		adjustCustomerItens();
 		return resultado;
 	}
 	// $: fractions = calculate_fractions(currentFractionNumber, currentQuantity);
@@ -82,9 +81,10 @@
 			$itens = [...$itens, item];
 		}
 		$itens = $itens.filter((item) => item.id !== id);
+		adjustCustomerItens()
 	}
 	function addItem() {
-		if (currentName === "" || currentQuantity === 0 || currentPrice === 0) {
+		if (currentItemName === "" || currentQuantity === 0 || currentPrice === 0) {
 			return;
 		}
 		let id = Math.floor(Math.random() * 1000);
@@ -92,29 +92,98 @@
 			...$itens,
 			{
 				id: id,
-				name: currentName,
+				name: currentItemName,
 				quantity: currentQuantity,
 				price: currentPrice,
 			},
 		];
-		currentName = "";
-		currentQuantity = 0;
-		currentPrice = 0;
+		currentItemName = Math.random().toString(36).substring(7);
+		currentQuantity = 1;
+		currentPrice = 1;
+		adjustCustomerItens()
 	}
 	function removeItem(id) {
 		// if (confirm("Are you sure you want to delete this item?")) {
 		$itens = $itens.filter((item) => item.id !== id);
+		adjustCustomerItens()
 		// }
 	}
 	function changeItem(id) {
 		$itens = $itens.map((item) => {
 			if (item.id === id) {
-				item.name = currentName;
+				item.name = currentItemName;
 				item.quantity = currentQuantity;
 				item.price = currentPrice;
 			}
 			return item;
 		});
+	}
+	function addCustomer() {
+		if (currentCustomerName === "") {
+			return;
+		}
+		let id = Math.floor(Math.random() * 1000);
+		let currentItens = $itens.map(item => {
+			return {
+				...item,
+				checked: false
+			}
+		})
+		$customers = [
+			...$customers,
+			{
+				id: id,
+				name: currentCustomerName,
+				itens:  currentItens,				
+			},
+		];
+		currentCustomerName = "";	
+	}
+	function removeCustomer(id) {
+		$customers = $customers.filter((customer) => customer.id !== id);
+	}
+	function adjustCustomerItens(){
+		console.log($customers)
+		$customers = $customers.map(customer => {
+			// remove the customer item if it is not in the itens list using a for loop			
+			// for (let i = 0; i < customer.itens.length; i++) {
+			// 	if (!$itens.includes(customer.itens[i])) {
+			// 		customer.itens.splice(i, 1);
+			// 	}
+			// }
+			// add the itens that are not in the customer itens list
+			for (let i = 0; i < $itens.length; i++) {
+				for (let j = 0; j < customer.itens.length; j++) {
+					if ($itens[i].name === customer.itens[j].name) {
+						break;
+					}
+					if (j === customer.itens.length - 1) {
+						customer.itens.push({
+							...$itens[i],
+							checked: false
+						})
+					}					
+				}
+			}
+			// remove the itens that are not in the itens list
+			for (let i = 0; i < customer.itens.length; i++) {
+				for (let j = 0; j < $itens.length; j++) {
+					if (customer.itens[i].name === $itens[j].name) {
+						break;
+					}
+					if (j === $itens.length - 1) {
+						customer.itens.splice(i, 1)
+					}
+				}
+			}			
+			return customer
+		})
+		
+		// let itemNames = $itens.map(item => item.name)
+		
+		
+		
+	
 	}
 </script>
 
@@ -125,25 +194,25 @@
 	/>
 </svelte:head>
 <main>
-	<!-- Input binded with name -->
+	<h2>Itens Consumidos</h2>
 	<Table striped="true">
 		<thead>
 			<td
-				>Name <Input
+				>Nome <Input
 					type="text"
-					bind:value={currentName}
+					bind:value={currentItemName}
 					placeholder="Name"
 				/></td
 			>
 			<td
-				>Quantity <Input
+				>Quantidade <Input
 					type="number"
 					bind:value={currentQuantity}
 					placeholder="Quantity"
 				/></td
 			>
 			<td
-				>Price <Input
+				>Preço <Input
 					type="number"
 					bind:value={currentPrice}
 					placeholder="Price"
@@ -157,7 +226,7 @@
 					<td
 						on:click={() => {
 							currentId = item.id;
-							currentName = item.name;
+							currentItemName = item.name;
 							currentQuantity = item.quantity;
 							currentPrice = item.price;
 							toggleEdit();
@@ -166,7 +235,7 @@
 					<td
 						on:click={() => {
 							currentId = item.id;
-							currentName = item.name;
+							currentItemName = item.name;
 							currentQuantity = item.quantity;
 							currentPrice = item.price;
 							toggleEdit();
@@ -175,7 +244,7 @@
 					<td
 						on:click={() => {
 							currentId = item.id;
-							currentName = item.name;
+							currentItemName = item.name;
 							currentQuantity = item.quantity;
 							currentPrice = item.price;
 							toggleEdit();
@@ -196,7 +265,7 @@
 							class="icon"
 							on:click={() => {
 								currentId = item.id;
-								currentName = item.name;
+								currentItemName = item.name;
 								currentQuantity = item.quantity;
 								currentPrice = item.price;
 								toogleSplit();
@@ -210,7 +279,7 @@
 	<Button on:click={clearAccount}>Limpar Conta</Button>
 	<Modal
 		body
-		header={currentName}
+		header={currentItemName}
 		isOpen={openEdit}
 		toggle={toggleEdit}
 		on:close={() => {
@@ -221,7 +290,7 @@
 			<tbody>
 				<tr>
 					<td>Name</td>
-					<td><Input type="text" bind:value={currentName} /></td>
+					<td><Input type="text" bind:value={currentItemName} /></td>
 				</tr>
 
 				<tr>
@@ -238,7 +307,7 @@
 	</Modal>
 	<Modal
 		body
-		header={currentName}
+		header={currentItemName}
 		isOpen={openSplit}
 		toggle={toogleSplit}
 		on:close={() => {
@@ -284,24 +353,49 @@
 			>Dividir</Button
 		>
 	</Modal>
-	<Avatar>JL</Avatar>
-	<Card>
-		<CardHeader>
-			<CardTitle>Card title</CardTitle>
-
-		</CardHeader>
-		<CardBody>
-			<CardText
-				>Some quick example text to build on the card title and make up
-				the bulk of the card's content.</CardText
-			>
-			<!-- create a form checkbox -->
-			<Input type="checkbox" />
-			<Input type="checkbox" />
-			<Input type="checkbox" />
-			<Button>Button</Button>
-		</CardBody>
-	</Card>
+	<h2>Pessoas na Mesa</h2>
+	<Table>
+		<thead>
+			<td><Input type="text" bind:value={currentCustomerName} placeholder="Name" /></td>
+			<td><Button color="primary" on:click={() => addCustomer()}>+</Button></td>
+		</thead>
+	</Table>
+	<div class="peopleCardList">
+		{#each $customers as {name,id,itens}}
+			<Card>
+				<CardHeader>
+					<Table>
+						<tr>
+							<td>{name}</td>
+							<td><button
+								style="color: red; float: right;"
+								class="icon"
+								on:click={removeCustomer(id)}><FaTrash /></button
+							></td>
+						</tr>
+					</Table>
+				</CardHeader>
+				<CardBody>
+					Items:
+					<table>
+						{#each itens as this_item}
+							<tr>
+								<td>
+									<input type="checkbox" bind:checked={this_item.checked}/>
+								</td>
+								<td>
+									{this_item.name}
+								</td>
+							</tr>
+						{/each}
+					</table>
+					
+				</CardBody>
+				<CardFooter>					
+				</CardFooter>
+			</Card>
+		{/each}
+	</div>
 </main>
 
 <style>
@@ -330,5 +424,10 @@
 	.icon:active {
 		background: none;
 		filter: drop-shadow(0 0 0.5rem green);
+	}
+	.peopleCardList {
+		display: grid;
+		grid-template-columns: 33% 33% 33%;
+		gap: 5px;
 	}
 </style>
