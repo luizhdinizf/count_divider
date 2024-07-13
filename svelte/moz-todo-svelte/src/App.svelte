@@ -97,9 +97,9 @@
 				price: currentPrice,
 			},
 		];
-		currentItemName = Math.random().toString(36).substring(7);
+		currentItemName = '';
 		currentQuantity = 1;
-		currentPrice = 1;
+		currentPrice = 0;
 		adjustCustomerItens()
 	}
 	function removeItem(id) {
@@ -126,7 +126,7 @@
 		let currentItens = $itens.map(item => {
 			return {
 				...item,
-				checked: false
+				checked: true
 			}
 		})
 		$customers = [
@@ -144,13 +144,7 @@
 	}
 	function adjustCustomerItens(){
 		console.log($customers)
-		$customers = $customers.map(customer => {
-			// remove the customer item if it is not in the itens list using a for loop			
-			// for (let i = 0; i < customer.itens.length; i++) {
-			// 	if (!$itens.includes(customer.itens[i])) {
-			// 		customer.itens.splice(i, 1);
-			// 	}
-			// }
+		$customers = $customers.map(customer => {			
 			// add the itens that are not in the customer itens list
 			for (let i = 0; i < $itens.length; i++) {
 				for (let j = 0; j < customer.itens.length; j++) {
