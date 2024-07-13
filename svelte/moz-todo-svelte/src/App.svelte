@@ -1,5 +1,15 @@
 <script>
-	import { Modal, Table, Button, Input } from "sveltestrap/src";
+	import {
+		Card,
+		CardBody,		
+		CardHeader,		
+		CardText,
+		CardTitle,
+		Modal,
+		Table,
+		Button,
+		Input,
+	} from "sveltestrap/src";
 	import { writable } from "svelte/store";
 
 	// Initialize the store with the value from localStorage
@@ -15,7 +25,6 @@
 
 	import FaTrash from "svelte-icons/fa/FaTrash.svelte";
 	import FaDivide from "svelte-icons/fa/FaDivide.svelte";
-	import FaCheck from "svelte-icons/fa/FaCheck.svelte";
 	let openEdit = false;
 	let openSplit = false;
 	const toggleEdit = () => (openEdit = !openEdit);
@@ -25,7 +34,7 @@
 	let currentName = "";
 	let currentQuantity = 1;
 	let currentPrice = 0;
-	let currentFractionNumber = 2;
+	let currentFractionNumber = 1;
 	function dividirEmPartes(numeroDeItens, quantidade) {
 		if (numeroDeItens === 0 || quantidade === 0) {
 			return;
@@ -49,10 +58,10 @@
 	// $: fractions = calculate_fractions(currentFractionNumber, currentQuantity);
 	$: fractions = dividirEmPartes(currentQuantity, currentFractionNumber);
 
-	function clearCurrent() {
-		currentName = "";
-		currentQuantity = 1;
-		currentPrice = 1;
+	function clearAccount() {
+		if (confirm("Você tem certeza que deseja limpar a conta?")) {
+			$itens = [];
+		}
 	}
 	function divideItem(id, fractions = [4, 5]) {
 		for (let i = 0; i < fractions.length; i++) {
@@ -85,9 +94,9 @@
 		currentPrice = 0;
 	}
 	function removeItem(id) {
-		if (confirm("Are you sure you want to delete this item?")) {
-			$itens = $itens.filter((item) => item.id !== id);
-		}
+		// if (confirm("Are you sure you want to delete this item?")) {
+		$itens = $itens.filter((item) => item.id !== id);
+		// }
 	}
 	function changeItem(id) {
 		$itens = $itens.map((item) => {
@@ -162,7 +171,11 @@
 							currentQuantity = item.quantity;
 							currentPrice = item.price;
 							toggleEdit();
-						}}>{item.price}</td
+						}}
+						>{new Intl.NumberFormat("pt-BR", {
+							style: "currency",
+							currency: "BRL",
+						}).format(item.price)}</td
 					>
 					<td>
 						<button
@@ -186,13 +199,15 @@
 			{/each}
 		</tbody>
 	</Table>
-	<Button on:click={() => ($itens = [])}>Limpar Conta</Button>
+	<Button on:click={clearAccount}>Limpar Conta</Button>
 	<Modal
 		body
 		header={currentName}
 		isOpen={openEdit}
 		toggle={toggleEdit}
-		on:close={clearCurrent}
+		on:close={() => {
+			changeItem(currentId);
+		}}
 	>
 		<Table>
 			<tbody>
@@ -212,20 +227,17 @@
 				</tr>
 			</tbody>
 		</Table>
-		<button
-			class="icon"
-			style="color: green;"
-			on:click={() => {
-				changeItem(currentId);
-			}}><FaCheck color="green" /></button
-		>
 	</Modal>
 	<Modal
 		body
 		header={currentName}
 		isOpen={openSplit}
 		toggle={toogleSplit}
-		on:close={clearCurrent}
+		on:close={() => {
+			// {
+			// 	divideItem(currentId, fractions);
+			// }
+		}}
 	>
 		<Table>
 			<tbody>
@@ -246,7 +258,7 @@
 
 				{#each fractions as fraction}
 					<tr>
-						<td>Fraction</td>
+						<td>Nova Quantidade</td>
 						<td
 							><Input
 								type="number"
@@ -255,21 +267,31 @@
 								max={currentQuantity}
 							/></td
 						>
-						incluir maximo e minimo no input
+						<!-- incluir maximo e minimo no input -->
 					</tr>
 				{/each}
 			</tbody>
 		</Table>
-		<button
-			class="icon"
-			style="color: green;"
-			on:click={() => {
-				{
-					divideItem(currentId, fractions);
-				}
-			}}><FaCheck class="icon" /></button
+		<Button on:click={() => divideItem(currentId, fractions)}
+			>Dividir</Button
 		>
 	</Modal>
+	<Card>
+		<CardHeader>
+			<CardTitle>Card title</CardTitle>
+		</CardHeader>
+		<CardBody>
+			<CardText
+				>Some quick example text to build on the card title and make up
+				the bulk of the card's content.</CardText
+			>
+			<!-- create a form checkbox -->
+			<Input type="checkbox" />
+			<Input type="checkbox" />
+			<Input type="checkbox" />
+			<Button>Button</Button>
+		</CardBody>
+	</Card>
 </main>
 
 <style>
