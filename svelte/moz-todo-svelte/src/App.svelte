@@ -14,8 +14,8 @@
 	});
 
 	import FaTrash from "svelte-icons/fa/FaTrash.svelte";
-	import FaDivide from 'svelte-icons/fa/FaDivide.svelte'
-	import FaCheck from 'svelte-icons/fa/FaCheck.svelte'
+	import FaDivide from "svelte-icons/fa/FaDivide.svelte";
+	import FaCheck from "svelte-icons/fa/FaCheck.svelte";
 	let openEdit = false;
 	let openSplit = false;
 	const toggleEdit = () => (openEdit = !openEdit);
@@ -168,7 +168,7 @@
 						<button
 							style="color: red;"
 							class="icon"
-							on:click={removeItem(item.id)}><FaTrash/></button
+							on:click={removeItem(item.id)}><FaTrash /></button
 						>
 						<button
 							style="color: blue;"
@@ -179,14 +179,14 @@
 								currentQuantity = item.quantity;
 								currentPrice = item.price;
 								toogleSplit();
-							}}><FaDivide/></button
+							}}><FaDivide /></button
 						>
 					</td>
 				</tr>
 			{/each}
 		</tbody>
 	</Table>
-	<Button on:click={() => $itens = []}>Limpar Conta</Button>
+	<Button on:click={() => ($itens = [])}>Limpar Conta</Button>
 	<Modal
 		body
 		header={currentName}
@@ -203,7 +203,8 @@
 
 				<tr>
 					<td>Quantity</td>
-					<td><Input type="number" bind:value={currentQuantity} /></td>
+					<td><Input type="number" bind:value={currentQuantity} /></td
+					>
 				</tr>
 				<tr>
 					<td>Price</td>
@@ -211,16 +212,13 @@
 				</tr>
 			</tbody>
 		</Table>
-		<button 
-
+		<button
 			class="icon"
 			style="color: green;"
 			on:click={() => {
 				changeItem(currentId);
-			}}><FaCheck color="green"/></button
+			}}><FaCheck color="green" /></button
 		>
-
-		
 	</Modal>
 	<Modal
 		body
@@ -249,7 +247,14 @@
 				{#each fractions as fraction}
 					<tr>
 						<td>Fraction</td>
-						<td><Input type="number" bind:value={fraction} min="1" max={currentQuantity} /></td>
+						<td
+							><Input
+								type="number"
+								bind:value={fraction}
+								min="1"
+								max={currentQuantity}
+							/></td
+						>
 						incluir maximo e minimo no input
 					</tr>
 				{/each}
@@ -262,7 +267,7 @@
 				{
 					divideItem(currentId, fractions);
 				}
-			}}><FaCheck class="icon"/></button
+			}}><FaCheck class="icon" /></button
 		>
 	</Modal>
 </main>
@@ -294,5 +299,4 @@
 		background: none;
 		filter: drop-shadow(0 0 0.5rem green);
 	}
-
 </style>
