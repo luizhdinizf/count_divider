@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "svelte-icons": "^2.1.0",
+    "sveltestrap": "^5.11.3"
+  },
+  "devDependencies": {
+    "svelte-bootstrap-icons": "^3.1.1"
+  }
+}
