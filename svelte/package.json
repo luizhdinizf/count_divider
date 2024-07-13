@@ -1,5 +1,7 @@
 {
   "dependencies": {
+    "flowbite": "^2.4.1",
+    "flowbite-svelte": "^0.46.15",
     "svelte-icons": "^2.1.0",
     "sveltestrap": "^5.11.3"
   },

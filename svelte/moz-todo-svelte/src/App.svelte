@@ -1,8 +1,8 @@
 <script>
 	import {
 		Card,
-		CardBody,		
-		CardHeader,		
+		CardBody,
+		CardHeader,
 		CardText,
 		CardTitle,
 		Modal,
@@ -11,6 +11,14 @@
 		Input,
 	} from "sveltestrap/src";
 	import { writable } from "svelte/store";
+	import {
+		Avatar,
+		Dropdown,
+		DropdownHeader,
+		DropdownItem,
+		DropdownDivider,
+		Tooltip,
+	} from "flowbite-svelte";
 
 	// Initialize the store with the value from localStorage
 	const initialItens = JSON.parse(localStorage.getItem("itens")) || [];
@@ -276,9 +284,11 @@
 			>Dividir</Button
 		>
 	</Modal>
+	<Avatar>JL</Avatar>
 	<Card>
 		<CardHeader>
 			<CardTitle>Card title</CardTitle>
+
 		</CardHeader>
 		<CardBody>
 			<CardText
