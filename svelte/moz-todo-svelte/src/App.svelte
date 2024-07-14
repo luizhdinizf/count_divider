@@ -31,6 +31,7 @@
 	import FaDivide from "svelte-icons/fa/FaDivide.svelte";
 	let openEdit = false;
 	let openSplit = false;
+	let enableTip = true;
 	const toggleEdit = () => (openEdit = !openEdit);
 	const toogleSplit = () => (openSplit = !openSplit);
 
@@ -40,6 +41,8 @@
 	let currentQuantity = 1;
 	let currentPrice = 0;
 	let currentFractionNumber = 1;
+	let customersTotalSum = 0;
+	
 	function dividirEmPartes(numeroDeItens, quantidade) {
 		if (numeroDeItens === 0 || quantidade === 0) {
 			return;
@@ -62,11 +65,83 @@
 	}
 	$: fractions = dividirEmPartes(currentQuantity, currentFractionNumber);
 
+	function calculate_bill_total(itens,enable) {
+		if (enable) {
+			billTotal = itens.reduce((acc, item) => acc + item.tipped_price * item.quantity, 0).toFixed(2);
+		} else {
+			billTotal = itens.reduce((acc, item) => acc + item.price * item.quantity, 0).toFixed(2);
+		}
+		return billTotal;
+	}
+	$: billTotal = calculate_bill_total($itens,enableTip);
+	$: accountDiference = customersTotalSum - billTotal;
+
+	
+	function calculate_customer_totals() {
+		let itens_subtotal = [];
+		for (let i = 0; i < $itens.length; i++) {
+			//counts how many customer checked this item
+			let count = 0;
+			
+			for (let j = 0; j < $customers.length; j++) {
+				for (let k = 0; k < $customers[j].itens.length; k++) {
+					if ($customers[j].itens[k].name === $itens[i].name && $customers[j].itens[k].checked) {
+						count++;
+						break;
+					}
+				}
+			}
+			let current_item_price = enableTip ?  $itens[i].tipped_price : $itens[i].price;
+			itens_subtotal.push({
+				name: $itens[i].name,
+				subtotal: (current_item_price*$itens[i].quantity) / count,
+			});
+		}
+		
+		// map customer and add subtotal to each customer
+		for (let i = 0; i < $customers.length; i++) {
+			let customer_total = 0;
+			for (let j = 0; j < $customers[i].itens.length; j++) {
+				if ($customers[i].itens[j].checked) {
+					customer_total += itens_subtotal.find((item) => item.name === $customers[i].itens[j].name).subtotal;
+				}
+			}
+			$customers[i].total = customer_total;
+		}
+		let total = 0;
+		for (let i = 0; i < $customers.length; i++) {
+			total += $customers[i].total;
+		}
+		customersTotalSum = total.toFixed(2);
+		let diff = billTotal - customersTotalSum;
+		let notSplittedItems = $itens.filter(item => !checkItemSplitted(item.name));
+		if (diff !== 0) {
+			let notSplittedItemsList = notSplittedItems.map(item => item.name).join('\n ');			
+			alert("Faltam R$ " + diff.toFixed(2) + " para fechar a conta!!\nOs seguintes itens não foram divididos:\n" + notSplittedItemsList);
+		}
+		
+	}
+
+	function checkItemSplitted(item_name){
+		for (let i = 0; i < $customers.length; i++) {
+			for (let j = 0; j < $customers[i].itens.length; j++) {
+				if ($customers[i].itens[j].name === item_name && $customers[i].itens[j].checked) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
 	function clearAccount() {
 		if (confirm("Você tem certeza que deseja limpar a conta?")) {
 			$itens = [];
+			//iterate over customers and set itens []
+			$customers = [];
+			customersTotalSum = 0;
 		}
 	}
+
 	function divideItem(id, fractions = [4, 5]) {
 		for (let i = 0; i < fractions.length; i++) {
 			let newid = Math.floor(Math.random() * 1000);
@@ -85,6 +160,7 @@
 			return;
 		}
 		let id = Math.floor(Math.random() * 1000);
+		let tipped_price = currentPrice * 1.1;
 		$itens = [
 			...$itens,
 			{
@@ -92,6 +168,7 @@
 				name: currentItemName,
 				quantity: currentQuantity,
 				price: currentPrice,
+				tipped_price: tipped_price,
 			},
 		];
 		currentItemName = '';
@@ -111,6 +188,7 @@
 				item.name = currentItemName;
 				item.quantity = currentQuantity;
 				item.price = currentPrice;
+				item.tipped_price = item.price * 1.1;
 			}
 			return item;
 		});
@@ -131,7 +209,8 @@
 			{
 				id: id,
 				name: currentCustomerName,
-				itens:  currentItens,				
+				itens:  currentItens,	
+				total: 0,			
 			},
 		];
 		currentCustomerName = "";	
@@ -179,27 +258,28 @@
 </svelte:head>
 <main>
 	<h2>Itens Consumidos</h2>
+	
 	<Table striped="true">
 		<thead>
 			<td
 				>Nome <Input
 					type="text"
 					bind:value={currentItemName}
-					placeholder="Name"
+					placeholder="Nome"
 				/></td
 			>
 			<td
 				>Quantidade <Input
 					type="number"
 					bind:value={currentQuantity}
-					placeholder="Quantity"
+					placeholder="Quantidade"
 				/></td
 			>
 			<td
 				>Preço <Input
 					type="number"
 					bind:value={currentPrice}
-					placeholder="Price"
+					placeholder="Preço"
 				/>
 			</td>
 			<td><Button color="primary" on:click={addItem}>+</Button></td>
@@ -207,8 +287,7 @@
 		<tbody>
 			{#each $itens as item}
 				<tr>
-					<td
-						on:keydown={}
+					<td						
 						on:click={() => {
 							currentId = item.id;
 							currentItemName = item.name;
@@ -237,7 +316,7 @@
 						>{new Intl.NumberFormat("pt-BR", {
 							style: "currency",
 							currency: "BRL",
-						}).format(item.price)}</td
+						}).format(enableTip ? item.tipped_price : item.price)}</td
 					>
 					<td>
 						<button
@@ -259,9 +338,15 @@
 					</td>
 				</tr>
 			{/each}
+			<tr>
+			<td><strong>Total</strong></td>
+			<td></td>
+			<td><strong>{new Intl.NumberFormat("pt-BR", {style: "currency",currency: "BRL",}).format(billTotal)}<strong></td>
+			<td></td>
+			</tr>
 		</tbody>
 	</Table>
-	<Button on:click={clearAccount}>Limpar Conta</Button>
+	
 	<Modal
 		body
 		header={currentItemName}
@@ -332,6 +417,7 @@
 						<!-- incluir maximo e minimo no input -->
 					</tr>
 				{/each}
+				
 			</tbody>
 		</Table>
 		<Button on:click={() => divideItem(currentId, fractions)}
@@ -346,7 +432,7 @@
 		</thead>
 	</Table>
 	<div class="peopleCardList">
-		{#each $customers as {name,id,itens}}
+		{#each $customers as {name,id,itens: customer_itens,total}}
 			<Card>
 				<CardHeader>
 					<Table>
@@ -361,26 +447,46 @@
 					</Table>
 				</CardHeader>
 				<CardBody>
-					Items:
-					<table>
-						{#each itens as this_item}
-							<tr>
-								<td>
-									<input type="checkbox" bind:checked={this_item.checked}/>
-								</td>
-								<td>
-									{this_item.name}
-								</td>
-							</tr>
+					Items:					
+						{#each customer_itens as this_item}
+								<div style="display: flex; align-items: center;">
+									<Input type="switch" bind:checked={this_item.checked}/>
+									<span on:click={() => this_item.checked = !this_item.checked} style="color:{checkItemSplitted(this_item.name) ? 'green' : 'red'}">{this_item.name}</span>
+								</div>					
 						{/each}
-					</table>
-					
 				</CardBody>
-				<CardFooter>					
+				<CardFooter>
+					<strong style="color: {accountDiference == 0 ? 'green' : 'red'}">		
+					Total: {new Intl.NumberFormat("pt-BR", {
+						style: "currency",
+						currency: "BRL",
+					}).format(total)}
+					</strong>
 				</CardFooter>
 			</Card>
 		{/each}
 	</div>
+	<br>
+	<table>
+		<tr>
+			<td><Button color="danger" on:click={clearAccount}>Limpar Conta</Button></td>
+			<td><Button color="success" on:click={calculate_customer_totals}>Dividir Conta</Button></td>
+			<td><Input type="switch" bind:checked={enableTip} label="10% de Gorjeta"/></td>
+		</tr>
+		<tr>
+			<td><strong>Total a ser pago:</strong></td>
+			<td>R${billTotal}</td>
+		</tr>
+		<tr>
+			<td style="color: {accountDiference == 0 ? 'green' : 'red'}"><strong>Total Calculado:</strong></td>
+			<td style="color: {accountDiference == 0 ? 'green' : 'red'}">R${customersTotalSum}</td>
+		</tr>
+		<tr>
+			<td style="color: {accountDiference == 0 ? 'green' : 'red'}"><strong>Diferença:</strong></td>
+			<td style="color: {accountDiference == 0 ? 'green' : 'red'}">R${(customersTotalSum - billTotal).toFixed(2)}</td>
+		</tr>
+	</table>	
+	
 </main>
 
 <style>
