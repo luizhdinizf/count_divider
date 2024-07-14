@@ -147,13 +147,13 @@
 	}
 
 	function divideItem(id, fractions = [4, 5]) {
-		for (let i = 0; i < fractions.length; i++) {
+		for (let i = 1; i < fractions.length + 1; i++) {
 			let newid = Math.floor(Math.random() * 1000);
 			let parentItem = $itens.find((item) => item.id === id);
 			let item = { ...parentItem };
 			item.id = newid;
-			item.name = parentItem.name + " " + i+1;
-			item.quantity = fractions[i];
+			item.name = parentItem.name + " " + i;
+			item.quantity = fractions[i-1];
 			$itens = [...$itens, item];
 		}
 		$itens = $itens.filter((item) => item.id !== id);
@@ -196,6 +196,7 @@
 			}
 			return item;
 		});
+		adjustCustomerItens()
 		currentItemName = "";
 	}
 	function changeCustomer(id) {
