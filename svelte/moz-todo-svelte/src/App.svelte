@@ -32,6 +32,7 @@
 	import FaTrash from "svelte-icons/fa/FaTrash.svelte";
 	import FaDivide from "svelte-icons/fa/FaDivide.svelte";
 	import FaClone from "svelte-icons/fa/FaClone.svelte";
+	import FaQuestion from "svelte-icons/fa/FaQuestion.svelte";
 	let openEditItem = false;
 	let openEditCustomer = false;
 	let openSplit = false;
@@ -294,8 +295,38 @@
 	/>
 </svelte:head>
 <main>
-	<h2>Itens Consumidos</h2>
+	<div style="display: flex; justify-content: space-between; align-items: center;">
+		<div>
+			<h2>Divisor de Conta</h2>
+			<Input type="switch" bind:checked={enableTip} label="10% de Gorjeta"/>
+		</div>
+	<button style="color: blue;" class="icon" id="toggler" ><FaQuestion/></button> 
+	</div>
 	
+	
+	<Fade toggler="#toggler">
+		<Card body>
+			<h6>Este aplicativo foi desenvolvido para ajudar a dividir a conta de um bar ou restaurante entre várias pessoas.</h6>
+	
+			<li>Para utilizar este aplicativo basta adicionar os itens consumidos de acordo com a comanda da mesa</li>
+			<li>Se na hora de adicionar o item você cometer algum erro, basta clicar no item e edita-lo, não precisa remover e adicionar novamente</li>
+			<li>Em seguida Adicione as pessoas que participaram da mesa</li>
+			<li>Marque os itens que cada pessoa consumiu e clique em "Dividir Conta" no final da tela para calcular quanto cada pessoa deve pagar.</li>
+			<li>O Valor que cada um deve pagar aparecerá na parte inferior do cartão da pessoa.</li>
+			<li>Se um item for marcado de vermelho no cartão das pessoas significa que ele não foi marcado como consumido por ninguém e é necessário marcar pelo menos uma pessoa como consumidor ou remover o item para que a conta possa fechar.</li>
+			<div>
+			<td style="color: blue" class="icon"><FaDivide/></td>
+			 <li> Botão de fatiar item. Exemplo: Suponha que a conta deu 10 cervejas mas algumas pessoas chegaram depois, então você pode dividir as cervejas entre quem ja estava na mesa e quem chegou depois.
+			</li>
+			<li> No popup, você pode ajustar o número de fatias, neste exemplo 2(antes e depois), e a quantidade de cada fatia, por exemplo 6 e 4.</li>
+				<li> Será gerado Cerveja 1 e Cerveja 2 com 6 e 4 cervejas respectivamente. </li>
+			
+			<li>
+				Marque Cerveja 1 e Cerveja 2 para quem chegou mais cedo e apenas Cerveja 2 para quem chegou depois.
+			</li>
+		</div>
+		</Card>
+	</Fade>
 	<Table striped="true">
 		<thead>
 			<td
@@ -320,6 +351,7 @@
 				/>
 			</td>
 			<td><Button color="primary" on:click={addItem}>+</Button></td>
+			
 		</thead>
 		<tbody>
 			{#each $itens as item}
@@ -441,7 +473,7 @@
 		<Table>
 			<tbody>
 				<tr> </tr><tr>
-					<td>Quantity</td>
+					<td>Alterar Quantidade</td>
 					<td><Input type="number" bind:value={currentQuantity} /></td
 					>
 				</tr>
@@ -476,10 +508,13 @@
 			>Dividir</Button
 		>
 	</Modal>
-	<h2>Pessoas na Mesa</h2>
+	<div style="display: flex;">
+		<h2>Pessoas na Mesa</h2>
+	</div>
+	
 	<Table>
 		<thead>
-			<td><Input type="text" bind:value={currentCustomerName} placeholder="Name" /></td>
+			<td><Input type="text" bind:value={currentCustomerName} placeholder="Nome" /></td>
 			<td><Button color="primary" on:click={() => addCustomer()}>+</Button></td>
 		</thead>
 	</Table>
@@ -529,7 +564,7 @@
 		<tr>
 			<td><Button color="danger" on:click={clearAccount}>Limpar Conta</Button></td>
 			<td><Button color="success" on:click={calculate_customer_totals}>Dividir Conta</Button></td>
-			<td><Input type="switch" bind:checked={enableTip} label="10% de Gorjeta"/></td>
+			<td></td>
 		</tr>
 	</table>
 	
