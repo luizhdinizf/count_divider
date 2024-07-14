@@ -326,7 +326,7 @@
 				Marque Cerveja 1 e Cerveja 2 para quem chegou mais cedo e apenas Cerveja 2 para quem chegou depois.
 			</li>
 			<li> 
-				Após fatiar é útil renomear os itens por exemplo para antes e depois, basta clica no item e renome-lo
+				Após fatiar é útil renomear os itens, por exemplo para antes e depois, basta clicar no item e renomeá-lo
 			</li>
 			<li>
 				Caso alguém precise sair mais cedo, basta utilizar a mesma lógica e marcar para ela tudo que ela consumiu até sair(Conta Parcial)
