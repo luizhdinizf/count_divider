@@ -152,7 +152,7 @@
 			let parentItem = $itens.find((item) => item.id === id);
 			let item = { ...parentItem };
 			item.id = newid;
-			item.name = parentItem.name + "_" + i;
+			item.name = parentItem.name + " " + i+1;
 			item.quantity = fractions[i];
 			$itens = [...$itens, item];
 		}
@@ -351,6 +351,8 @@
 							class="icon"
 							on:click={removeItem(item.id)}><FaTrash /></button
 						>
+					</td>
+					<td>
 						<button
 							style="color: blue;"
 							class="icon"
