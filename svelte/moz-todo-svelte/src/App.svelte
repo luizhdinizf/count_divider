@@ -313,7 +313,7 @@
 			<li>Em seguida Adicione as pessoas que participaram da mesa</li>
 			<li>Marque os itens que cada pessoa consumiu e clique em "Dividir Conta" no final da tela para calcular quanto cada pessoa deve pagar.</li>
 			<li>O Valor que cada um deve pagar aparecerá na parte inferior do cartão da pessoa.</li>
-			<li>Caso você altere/adicione/remova algum item basta clicar em "Dividir Conta" Novamente</li>
+			<li>Caso você altere/adicione/remova algum item basta clicar novamente em "Dividir Conta" </li>
 			<li>Se um item for marcado de vermelho no cartão das pessoas significa que ele não foi marcado como consumido por ninguém e é necessário marcar pelo menos uma pessoa como consumidor ou remover o item para que a conta possa fechar.</li>
 			<div>
 			<td style="color: blue" class="icon"><FaDivide/></td>
