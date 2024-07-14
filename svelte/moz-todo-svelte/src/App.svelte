@@ -4,9 +4,11 @@
 		CardBody,
 		CardHeader,
 		CardFooter,
+		Fade,
 		Modal,
 		Table,
 		Button,
+		ButtonGroup,
 		Input,
 	} from "sveltestrap/src";
 	import { writable } from "svelte/store";
@@ -491,7 +493,7 @@
 							currentCustomerName = name;              
 							toggleEditCustomer();
 						}}>{name}</div>
-						<div style="display: flex; justify-content: flex-end;">
+						<ButtonGroup>
 							<button
 								style="color: blue;"
 								class="icon"
@@ -500,7 +502,7 @@
 								style="color: red;"
 								class="icon"
 								on:click={removeCustomer(id)}><FaTrash /></button>
-						</div>
+						</ButtonGroup>
 					</div>
 				</CardHeader>
 				<CardBody>
@@ -529,21 +531,26 @@
 			<td><Button color="success" on:click={calculate_customer_totals}>Dividir Conta</Button></td>
 			<td><Input type="switch" bind:checked={enableTip} label="10% de Gorjeta"/></td>
 		</tr>
-		<tr>
-			<td><strong>Total a ser pago:</strong></td>
-			<td>R${billTotal}</td>
-		</tr>
-		<tr>
-			<td style="color: {accountDiference == 0 ? 'green' : 'red'}"><strong>Total Calculado:</strong></td>
-			<td style="color: {accountDiference == 0 ? 'green' : 'red'}">R${customersTotalSum}</td>
-		</tr>
-		<tr>
-			<td style="color: {accountDiference == 0 ? 'green' : 'red'}"><strong>Diferença:</strong></td>
-			<td style="color: {accountDiference == 0 ? 'green' : 'red'}">R${(customersTotalSum - billTotal).toFixed(2)}</td>
-		</tr>	
 	</table>
-	<div>
-	<h2>Detalhes da Conta</h2>
+	
+	<Button color="primary" id="detail_toogler">
+		Detalhes da Conta
+	  </Button>
+	<Fade toggler="#detail_toogler">
+		<table>
+			<tr>
+				<td><strong>Total a ser pago:</strong></td>
+				<td>R${billTotal}</td>
+			</tr>
+			<tr>
+				<td style="color: {accountDiference == 0 ? 'green' : 'red'}"><strong>Total Calculado:</strong></td>
+				<td style="color: {accountDiference == 0 ? 'green' : 'red'}">R${customersTotalSum}</td>
+			</tr>
+			<tr>
+				<td style="color: {accountDiference == 0 ? 'green' : 'red'}"><strong>Diferença:</strong></td>
+				<td style="color: {accountDiference == 0 ? 'green' : 'red'}">R${(customersTotalSum - billTotal).toFixed(2)}</td>
+			</tr>	
+		</table>
 	<p>Esta tabela mostra Quantas pessoas consumiram cada item e quanto cada uma pagará por aquele item,
 		 por exemplo se o total de cervejas deu R$80,00 e 4 pessoas consumiram cervejas, então o Número de Consumidores é 4 e o Valor por pessoa é R$80,00 dividido por 4 = R$20,00</p>
 		<table>
@@ -568,7 +575,8 @@
 				</tr>
 			{/each}
 		</table>
-	</div>
+	</Fade>
+
 </main>
 
 <style>
