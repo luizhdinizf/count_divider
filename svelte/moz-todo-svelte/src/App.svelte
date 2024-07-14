@@ -308,22 +308,33 @@
 		<Card body>
 			<h6>Este aplicativo foi desenvolvido para ajudar a dividir a conta de um bar ou restaurante entre várias pessoas.</h6>
 	
-			<li>Para utilizar este aplicativo basta adicionar os itens consumidos de acordo com a comanda da mesa</li>
-			<li>Se na hora de adicionar o item você cometer algum erro, basta clicar no item e edita-lo, não precisa remover e adicionar novamente</li>
+			<li>Para utiliza-lo basta adicionar os itens consumidos de acordo com a comanda ou conta final da mesa</li>
+			<li>Se na hora de adicionar o item você cometer algum erro, basta clicar no item e editá-lo, não precisa remover e adicionar novamente</li>
 			<li>Em seguida Adicione as pessoas que participaram da mesa</li>
 			<li>Marque os itens que cada pessoa consumiu e clique em "Dividir Conta" no final da tela para calcular quanto cada pessoa deve pagar.</li>
 			<li>O Valor que cada um deve pagar aparecerá na parte inferior do cartão da pessoa.</li>
+			<li>Caso você altere/adicione/remova algum item basta clicar em "Dividir Conta" Novamente</li>
 			<li>Se um item for marcado de vermelho no cartão das pessoas significa que ele não foi marcado como consumido por ninguém e é necessário marcar pelo menos uma pessoa como consumidor ou remover o item para que a conta possa fechar.</li>
 			<div>
 			<td style="color: blue" class="icon"><FaDivide/></td>
 			 <li> Botão de fatiar item. Exemplo: Suponha que a conta deu 10 cervejas mas algumas pessoas chegaram depois, então você pode dividir as cervejas entre quem ja estava na mesa e quem chegou depois.
 			</li>
-			<li> No popup, você pode ajustar o número de fatias, neste exemplo 2(antes e depois), e a quantidade de cada fatia, por exemplo 6 e 4.</li>
+			<li> No popup, ajuste o número de fatias, neste exemplo 2(antes e depois), e a quantidade de cada fatia, por exemplo 6 e 4.</li>
 				<li> Será gerado Cerveja 1 e Cerveja 2 com 6 e 4 cervejas respectivamente. </li>
 			
 			<li>
 				Marque Cerveja 1 e Cerveja 2 para quem chegou mais cedo e apenas Cerveja 2 para quem chegou depois.
 			</li>
+			<li> 
+				Após fatiar é útil renomear os itens por exemplo para antes e depois, basta clica no item e renome-lo
+			</li>
+			<li>
+				Caso alguém precise sair mais cedo, basta utilizar a mesma lógica e marcar para ela tudo que ela consumiu até sair(Conta Parcial)
+			</li>
+			<li>
+				Se apenas uma pessoa se recusar a pagar os 10%, esta pessoa não merece ir para o bar
+			</li>
+			
 		</div>
 		</Card>
 	</Fade>
