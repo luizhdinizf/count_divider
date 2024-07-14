@@ -82,7 +82,6 @@
 
 	
 	function calculate_customer_totals() {
-		let itens_subtotal = [];
 		for (let i = 0; i < $itens.length; i++) {
 			//counts how many customer checked this item
 			let count = 0;
@@ -90,24 +89,29 @@
 			for (let j = 0; j < $customers.length; j++) {
 				for (let k = 0; k < $customers[j].itens.length; k++) {
 					if ($customers[j].itens[k].name === $itens[i].name && $customers[j].itens[k].checked) {
-						count++;
+						count += 1;
 						break;
 					}
 				}
 			}
-			let current_item_price = enableTip ?  $itens[i].tipped_price : $itens[i].price;
-			itens_subtotal.push({
-				name: $itens[i].name,
-				subtotal: (current_item_price*$itens[i].quantity) / count,
-			});
-		}
+			$itens[i].dividers = count;
+			
+		};
+		console.log($itens);
+		let current_item_price = 0;
+		$itens = $itens.map((item) => {
+			current_item_price = enableTip ?  item.tipped_price : item.price;			
+			item.subtotal = (current_item_price * item.quantity);
+			item.division = item.subtotal / item.dividers;
+			return item;
+		});
 		
 		// map customer and add subtotal to each customer
 		for (let i = 0; i < $customers.length; i++) {
 			let customer_total = 0;
 			for (let j = 0; j < $customers[i].itens.length; j++) {
 				if ($customers[i].itens[j].checked) {
-					customer_total += itens_subtotal.find((item) => item.name === $customers[i].itens[j].name).subtotal;
+					customer_total += $itens.find((item) => item.name === $customers[i].itens[j].name).division;
 				}
 			}
 			$customers[i].total = customer_total;
@@ -173,6 +177,9 @@
 				quantity: currentQuantity,
 				price: currentPrice,
 				tipped_price: tipped_price,
+				subtotal: currentPrice * currentQuantity,
+				dividers: 0,
+				division: 0,
 			},
 		];
 		currentItemName = '';
@@ -346,6 +353,7 @@
 							currency: "BRL",
 						}).format(enableTip ? item.tipped_price : item.price)}</td
 					>
+					
 					<td>
 						<button
 							style="color: red;"
@@ -532,9 +540,35 @@
 		<tr>
 			<td style="color: {accountDiference == 0 ? 'green' : 'red'}"><strong>Diferença:</strong></td>
 			<td style="color: {accountDiference == 0 ? 'green' : 'red'}">R${(customersTotalSum - billTotal).toFixed(2)}</td>
-		</tr>
-	</table>	
-	
+		</tr>	
+	</table>
+	<div>
+	<h2>Detalhes da Conta</h2>
+	<p>Esta tabela mostra Quantas pessoas consumiram cada item e quanto cada uma pagará por aquele item,
+		 por exemplo se o total de cervejas deu R$80,00 e 4 pessoas consumiram cervejas, então o Número de Consumidores é 4 e o Valor por pessoa é R$80,00 dividido por 4 = R$20,00</p>
+		<table>
+			<tr>
+				<th>Item</th>
+				<th>Número de Consumidores</th>
+				<th>Valor por Pessoa</th>
+				<th>Total</th>
+			</tr>
+			{#each $itens as item (item.id)}
+				<tr>
+					<td>{item.name}</td>
+					<td>{item.dividers}</td>
+					<td>{new Intl.NumberFormat("pt-BR", {
+						style: "currency",
+						currency: "BRL",
+					}).format(item.division)}</td>
+					<td>{new Intl.NumberFormat("pt-BR", {
+						style: "currency",
+						currency: "BRL",
+					}).format(item.subtotal)}</td>
+				</tr>
+			{/each}
+		</table>
+	</div>
 </main>
 
 <style>
