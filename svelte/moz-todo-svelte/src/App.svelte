@@ -29,15 +29,19 @@
 
 	import FaTrash from "svelte-icons/fa/FaTrash.svelte";
 	import FaDivide from "svelte-icons/fa/FaDivide.svelte";
-	let openEdit = false;
+	import FaClone from "svelte-icons/fa/FaClone.svelte";
+	let openEditItem = false;
+	let openEditCustomer = false;
 	let openSplit = false;
 	let enableTip = true;
-	const toggleEdit = () => (openEdit = !openEdit);
+	const toggleEditItem = () => (openEditItem = !openEditItem);
+	const toggleEditCustomer = () => (openEditCustomer = !openEditCustomer);
 	const toogleSplit = () => (openSplit = !openSplit);
 
-	let currentId = 0;
+	let currentItemId = 0;
 	let currentItemName = "";
 	let currentCustomerName = "";	
+	let currentCustomerId = 0;	
 	let currentQuantity = 1;
 	let currentPrice = 0;
 	let currentFractionNumber = 1;
@@ -192,6 +196,16 @@
 			}
 			return item;
 		});
+		currentItemName = "";
+	}
+	function changeCustomer(id) {
+		$customers = $customers.map((customer) => {
+			if (customer.id === id) {
+				customer.name = currentCustomerName;
+			}
+			return customer;
+		});
+		currentCustomerName = "";
 	}
 	function addCustomer() {
 		if (currentCustomerName === "") {
@@ -214,6 +228,19 @@
 			},
 		];
 		currentCustomerName = "";	
+	}
+	function cloneCustomer(id) {
+		let customer = $customers.find((customer) => customer.id === id);
+		let new_id = Math.floor(Math.random() * 1000);
+		$customers = [
+			...$customers,
+			{
+				id: new_id,
+				name: customer.name + " (cópia)",
+				itens: customer.itens,
+				total: 0,
+			},
+		];
 	}
 	function removeCustomer(id) {
 		$customers = $customers.filter((customer) => customer.id !== id);
@@ -289,29 +316,29 @@
 				<tr>
 					<td						
 						on:click={() => {
-							currentId = item.id;
+							currentItemId = item.id;
 							currentItemName = item.name;
 							currentQuantity = item.quantity;
 							currentPrice = item.price;
-							toggleEdit();
+							toggleEditItem();
 						}}>{item.name}</td
 					>
 					<td
 						on:click={() => {
-							currentId = item.id;
+							currentItemId = item.id;
 							currentItemName = item.name;
 							currentQuantity = item.quantity;
 							currentPrice = item.price;
-							toggleEdit();
+							toggleEditItem();
 						}}>{item.quantity}</td
 					>
 					<td
 						on:click={() => {
-							currentId = item.id;
+							currentItemId = item.id;
 							currentItemName = item.name;
 							currentQuantity = item.quantity;
 							currentPrice = item.price;
-							toggleEdit();
+							toggleEditItem();
 						}}
 						>{new Intl.NumberFormat("pt-BR", {
 							style: "currency",
@@ -328,7 +355,7 @@
 							style="color: blue;"
 							class="icon"
 							on:click={() => {
-								currentId = item.id;
+								currentItemId = item.id;
 								currentItemName = item.name;
 								currentQuantity = item.quantity;
 								currentPrice = item.price;
@@ -350,10 +377,10 @@
 	<Modal
 		body
 		header={currentItemName}
-		isOpen={openEdit}
-		toggle={toggleEdit}
+		isOpen={openEditItem}
+		toggle={toggleEditItem}
 		on:close={() => {
-			changeItem(currentId);
+			changeItem(currentItemId);
 		}}
 	>
 		<Table>
@@ -375,6 +402,18 @@
 			</tbody>
 		</Table>
 	</Modal>
+	<!-- Modal de edição depessoa -->
+	<Modal
+		body
+		header={currentCustomerName}
+		isOpen={openEditCustomer}
+		toggle={toggleEditCustomer}
+		on:close={() => {
+			changeCustomer(currentCustomerId);
+		}}
+	>
+		<Input type="text" bind:value={currentCustomerName} />
+	</Modal>
 	<Modal
 		body
 		header={currentItemName}
@@ -382,7 +421,7 @@
 		toggle={toogleSplit}
 		on:close={() => {
 			// {
-			// 	divideItem(currentId, fractions);
+			// 	divideItem(currentItemId, fractions);
 			// }
 		}}
 	>
@@ -420,7 +459,7 @@
 				
 			</tbody>
 		</Table>
-		<Button on:click={() => divideItem(currentId, fractions)}
+		<Button on:click={() => divideItem(currentItemId, fractions)}
 			>Dividir</Button
 		>
 	</Modal>
@@ -435,19 +474,25 @@
 		{#each $customers as {name,id,itens: customer_itens,total}}
 			<Card>
 				<CardHeader>
-					<Table>
-						<tr>
-							<td>{name}</td>
-							<td><button
-								style="color: red; float: right;"
+					<div style="display: flex; justify-content: space-between; align-items: center;">
+						<div style="text-align: center; flex-grow: 1; font-weight: bold;" on:click={() => {
+							currentCustomerId = id;  
+							currentCustomerName = name;              
+							toggleEditCustomer();
+						}}>{name}</div>
+						<div style="display: flex; justify-content: flex-end;">
+							<button
+								style="color: blue;"
 								class="icon"
-								on:click={removeCustomer(id)}><FaTrash /></button
-							></td>
-						</tr>
-					</Table>
+								on:click={cloneCustomer(id)}><FaClone /></button>
+							<button
+								style="color: red;"
+								class="icon"
+								on:click={removeCustomer(id)}><FaTrash /></button>
+						</div>
+					</div>
 				</CardHeader>
 				<CardBody>
-					Items:					
 						{#each customer_itens as this_item}
 								<div style="display: flex; align-items: center;">
 									<Input type="switch" bind:checked={this_item.checked}/>
@@ -517,8 +562,11 @@
 		filter: drop-shadow(0 0 0.5rem green);
 	}
 	.peopleCardList {
-		display: grid;
-		grid-template-columns: 33% 33% 33%;
-		gap: 5px;
+		display: flex;
+		flex-wrap: wrap;
+		gap: 20px;
 	}
+	
+
+		
 </style>
